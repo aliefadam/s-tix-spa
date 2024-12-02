@@ -128,11 +128,37 @@ if (!function_exists("getTotalTicket")) {
     }
 }
 
+if (!function_exists("getGroupingTicket")) {
+    function getGroupingTicket($transactionID)
+    {
+        $transaction = Transaction::find($transactionID);
+        $data = [];
+        foreach ($transaction->transaction_detail->where('ticket_id', '!=', null)->groupBy('ticket_id') as $detail) {
+            foreach ($detail as $ticket) {
+                array_push($data, [
+                    "ticket_name" => getTicket($ticket->ticket_id)->name,
+                    "ticket_count" => $detail->count(),
+                    "ticket_price" => formatMoney(getTicket($ticket->ticket_id)->price),
+                ]);
+            }
+        }
+        return $data;
+    }
+}
+
 if (!function_exists("getDataPembeli")) {
     function getDataPembeli($transactionID)
     {
         $transaction = Transaction::find($transactionID);
-        return $transaction->transaction_detail->firstWhere("type", "pembeli");
+        $pembeli = $transaction->transaction_detail->firstWhere("type", "pembeli");
+        return [
+            "name" => $pembeli->name,
+            "email" => $pembeli->email,
+            "gender" => $pembeli->gender,
+            "date_of_birth" => concatDate($pembeli->date, $pembeli->month, $pembeli->year),
+            "identity_type" => $pembeli->identity_type,
+            "identity_number" => $pembeli->identity_number
+        ];
     }
 }
 
@@ -140,7 +166,20 @@ if (!function_exists("getDataPengunjung")) {
     function getDataPengunjung($transactionID)
     {
         $transaction = Transaction::find($transactionID);
-        return $transaction->transaction_detail->where("type", "pengunjung");
+        $visitors = $transaction->transaction_detail->where("type", "pengunjung");
+        $data = [];
+        foreach ($visitors as $visitor) {
+            array_push($data, [
+                "ticket_name" => getTicket($visitor->ticket_id)->name,
+                "name" => $visitor->name,
+                "email" => $visitor->email,
+                "gender" => $visitor->gender,
+                "date_of_birth" => concatDate($visitor->date, $visitor->month, $visitor->year),
+                "identity_type" => $visitor->identity_type,
+                "identity_number" => $visitor->identity_number
+            ]);
+        }
+        return $data;
     }
 }
 
@@ -193,6 +232,7 @@ if (!function_exists("mappingEvent")) {
                 ];
             }),
             "maps_link" => $event->maps_link,
+            "url" => url("/event/{$event->slug}"),
             "created_by" => $event->vendor->user->name,
         ];
     }

@@ -13,7 +13,7 @@ function TransactionDetailModal({ transaction }) {
             <div className="relative p-4 w-full max-w-2xl max-h-full">
                 <div className="relative bg-white rounded-lg shadow dark:bg-gray-700 overflow-hidden">
                     <TransactionDetailModalHeader />
-                    <TransactionDetailModalBody />
+                    <TransactionDetailModalBody transaction={transaction} />
                 </div>
             </div>
         </div>

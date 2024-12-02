@@ -151,6 +151,10 @@ class PageController extends Controller
             "transaction" => [
                 "invoice" => $transaction->invoice,
                 "status" => $transaction->status,
+                "event" => mappingEvent($transaction->event),
+                "buyer" => getDataPembeli($transaction->id),
+                "visitor" => getDataPengunjung($transaction->id),
+                "tickets" => getGroupingTicket($transaction->id),
                 "payment" => [
                     "method" => json_decode($transaction->payment)->method,
                     "data" => json_decode($transaction->payment)->data,
@@ -158,7 +162,12 @@ class PageController extends Controller
                     "expiration_date_raw" => json_decode($transaction->payment)->expiration_date,
                     "image" => MethodPayment::firstWhere("name", json_decode($transaction->payment)->method)->image
                 ],
+                "internet_fee" => formatMoney($transaction->internet_fee),
+                "tax_percent" => $transaction->tax_percent,
+                "tax_amount" => formatMoney($transaction->tax_amount),
+                "total_ticket_price" => formatMoney(getTotalTicket($transaction->id)),
                 "total" => formatMoney($transaction->total),
+                "created_at" => formatDate($transaction->created_at),
             ],
         ]);
     }
